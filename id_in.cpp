@@ -214,7 +214,7 @@ int IN_JoyButtons()
 
     int res = 0;
     for(int i = 0; i < JoyNumButtons && i < 32; i++)
-        res |= SDL_JoystickGetButton(Joystick, i) << i;
+        res |= SDL_JoystickGetButton(Joystick, i) << (i & 3);
     return res;
 }
 
@@ -258,7 +258,7 @@ static void processEvent(SDL_Event *event)
             if(event->key.keysym.scancode==SDL_SCANCODE_SCROLLLOCK || event->key.keysym.scancode==SDL_SCANCODE_F12)
             {
                 GrabInput = !GrabInput;
-				SDL_SetWindowGrab(screenWindow, (SDL_bool)GrabInput);
+                SDL_SetWindowGrab(screenWindow, (SDL_bool)GrabInput);
                 return;
             }
 
@@ -295,7 +295,7 @@ static void processEvent(SDL_Event *event)
             if(LastScan == SDL_SCANCODE_PAUSE)
                 Paused = true;
             break;
-		}
+        }
 
         case SDL_KEYUP:
         {
