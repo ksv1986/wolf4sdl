@@ -1043,6 +1043,7 @@ void ClearPaletteShifts (void)
 void StartBonusFlash (void)
 {
     bonuscount = NUMWHITESHIFTS * WHITETICS;    // white shift palette
+    IN_WeakRumble ();
 }
 
 
@@ -1057,6 +1058,7 @@ void StartBonusFlash (void)
 void StartDamageFlash (int damage)
 {
     damagecount += damage;
+    IN_StrongRumble ();
 }
 
 
@@ -1112,6 +1114,7 @@ void UpdatePaletteShifts (void)
     {
         VL_SetPalette (gamepal, false);        // back to normal
         palshifted = false;
+        IN_StopRumble ();
     }
 }
 
@@ -1132,6 +1135,7 @@ void FinishPaletteShifts (void)
     {
         palshifted = 0;
         VL_SetPalette (gamepal, true);
+        IN_StopRumble ();
     }
 }
 

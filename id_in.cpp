@@ -59,6 +59,14 @@ static KeyboardDef KbdDefs = {
 static SDL_Joystick *Joystick;
 int JoyNumButtons;
 static int JoyNumHats;
+boolean hapticEnabled = false;
+static SDL_Haptic *haptic = NULL;
+static SDL_HapticEffect strongEffect;
+static SDL_HapticEffect weakEffect;
+static int hapticEffect = -1;
+static const Uint32 strongLength = 300;
+static const Uint32 weakLength  = 150;
+#define SDL_HAPTIC_MAX_MAGNITUDE 0x7FFF
 
 static bool GrabInput = false;
 
@@ -380,6 +388,25 @@ IN_Startup(void)
             JoyNumHats = SDL_JoystickNumHats(Joystick);
             if(param_joystickhat < -1 || param_joystickhat >= JoyNumHats)
                 Quit("The joystickhat param must be between 0 and %i!", JoyNumHats - 1);
+            haptic = SDL_HapticOpenFromJoystick(Joystick);
+            if (haptic) {
+                unsigned int flags = SDL_HapticQuery(haptic);
+                if ((flags & SDL_HAPTIC_LEFTRIGHT) == 0) {
+                    fprintf(stderr, "Only XInput force feedback is supported!\n");
+                    SDL_HapticClose(haptic);
+                    haptic = NULL;
+                }
+                strongEffect.leftright.type            = SDL_HAPTIC_LEFTRIGHT;
+                strongEffect.leftright.length          = strongLength;
+                strongEffect.leftright.large_magnitude = SDL_HAPTIC_MAX_MAGNITUDE;
+                strongEffect.leftright.small_magnitude = 0;
+                weakEffect.leftright.type              = SDL_HAPTIC_LEFTRIGHT;
+                weakEffect.leftright.length            = weakLength;
+                weakEffect.leftright.large_magnitude   = 0;
+                weakEffect.leftright.small_magnitude   = SDL_HAPTIC_MAX_MAGNITUDE;
+                hapticEnabled = true;
+            } else
+                fprintf(stderr, "Haptic not found\n");
         }
     }
 
@@ -411,13 +438,15 @@ IN_Startup(void)
 void
 IN_Shutdown(void)
 {
-	if (!IN_Started)
-		return;
+    if (!IN_Started)
+        return;
 
     if(Joystick)
         SDL_JoystickClose(Joystick);
 
-	IN_Started = false;
+    SDL_HapticClose(haptic);
+
+    IN_Started = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -657,4 +686,38 @@ bool IN_IsInputGrabbed()
 void IN_CenterMouse()
 {
     SDL_WarpMouseInWindow(screenWindow, screenWidth / 2, screenHeight / 2);
+}
+
+boolean IN_HapticPresent(void)
+{
+    return haptic != NULL;
+}
+
+void IN_RunHapticEffect(SDL_HapticEffect *effect)
+{
+    if (!haptic || !hapticEnabled)
+        return;
+    if (hapticEffect >= 0)
+        SDL_HapticDestroyEffect(haptic, hapticEffect);
+    hapticEffect = SDL_HapticNewEffect(haptic, effect);
+    SDL_HapticRunEffect(haptic, hapticEffect, 1);
+}
+
+void IN_WeakRumble(void)
+{
+    IN_RunHapticEffect(&weakEffect);
+}
+
+void IN_StrongRumble(void)
+{
+    IN_RunHapticEffect(&strongEffect);
+}
+
+void IN_StopRumble(void)
+{
+    if (!haptic)
+        return;
+    if (hapticEffect >= 0)
+        SDL_HapticDestroyEffect(haptic, hapticEffect);
+    hapticEffect = -1;
 }

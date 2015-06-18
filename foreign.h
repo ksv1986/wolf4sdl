@@ -46,6 +46,7 @@
 #define	STR_MOUSEEN	"Mouse Enabled"
 #define	STR_JOYEN	"Joystick Enabled"
 #define	STR_PORT2	"Use joystick port 2"
+#define	STR_FEEDBACK    "Use Force Feedback"
 #define	STR_GAMEPAD	"Gravis GamePad Enabled"
 #define	STR_SENS	"Mouse Sensitivity"
 #define	STR_CUSTOM	"Customize controls"

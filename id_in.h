@@ -143,7 +143,7 @@ extern  volatile char       LastASCII;
 extern  volatile ScanCode   LastScan;
 extern           int        JoyNumButtons;
 extern           boolean    forcegrabmouse;
-
+extern           boolean    hapticEnabled;
 
 // Function prototypes
 #define	IN_KeyDown(code)	(Keyboard[(code)])
@@ -180,5 +180,10 @@ void    IN_StartAck(void);
 boolean IN_CheckAck (void);
 bool    IN_IsInputGrabbed();
 void    IN_CenterMouse();
+
+boolean IN_HapticPresent(void);
+void IN_WeakRumble(void);
+void IN_StrongRumble(void);
+void IN_StopRumble(void);
 
 #endif
